@@ -148,6 +148,7 @@ const ScoringInterface = () => {
       type: 'WICKET_TAKEN',
       payload: {
         teamId: currentTeam.id,
+        bowlingTeamId: bowlingTeam.id,
         batsman: batsmanKey,
         ballNumber: state.ballCount + 1
       }
@@ -424,8 +425,9 @@ const ScoringInterface = () => {
                 Retire Batsman
               </Button>
               <Button
-                onClick={() => {/* TODO: Implement undo */}}
-                className="bg-gray-600 hover:bg-gray-700 text-white"
+                onClick={() => dispatch({ type: 'UNDO_LAST_ACTION' })}
+                disabled={!state.lastAction}
+                className="bg-gray-600 hover:bg-gray-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
                 Undo
@@ -439,3 +441,4 @@ const ScoringInterface = () => {
 };
 
 export default ScoringInterface;
+
