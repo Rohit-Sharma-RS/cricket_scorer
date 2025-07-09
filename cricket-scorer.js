@@ -871,8 +871,7 @@ class CricketScorer {
         const totalLegalBalls = currentInnings.balls.filter(b => !b.isWide && !b.isNoBall).length;
         currentInnings.overs = Math.floor(totalLegalBalls / 6) + (totalLegalBalls % 6) / 10;
         
-        // Remove from ball history
-        this.ballHistory.shift();
+        this.ballHistory.pop();
         
         // Update display
         this.updateScoringDisplay();
@@ -880,6 +879,7 @@ class CricketScorer {
         
         this.saveToStorage();
     }
+
 
     // Modal Management
     showWicketModal() {

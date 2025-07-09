@@ -46,7 +46,7 @@ function AppContent() {
       <footer className="relative bottom-0 left-0 right-0 glass-card border-t border-white/10 p-3 mt-8">
         <div className="text-center">
           <p className="text-white/70 text-sm">
-            Made for fun and ❤️ by <span className="footer-text font-bold">Rohit</span>
+            Made for the ❤️ of cricket by <span className="footer-text font-bold">Rohit</span>
           </p>
         </div>
       </footer>
