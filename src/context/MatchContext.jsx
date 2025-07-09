@@ -16,7 +16,6 @@ const initialState = {
   tossWinner: null,
   battingFirst: null,
   matchHistory: [],
-  lastAction: null, // Store last action for undo
   showTossModal: false,
   showBowlerChangeModal: false,
   showRetiredBatsmanModal: false,
@@ -58,51 +57,41 @@ function matchReducer(state, action) {
         currentOver: []
       };
     
-    case 'SCORE_RUNS':
-      const newState = {
+    case 'SCORE_RUNS': {
+      const updatedTeams = state.teams.map(team => {
+        if (team.id !== action.payload.teamId) return team;
+
+        return {
+          ...team,
+          score: team.score + action.payload.runs
+        };
+      });
+
+      const updatedBowler = {
+        ...state.currentBowler,
+        runsConceded: (state.currentBowler.runsConceded || 0) + action.payload.runs,
+        ballsBowled: (state.currentBowler.ballsBowled || 0) + 1
+      };
+
+      return {
         ...state,
-        teams: state.teams.map(team => 
-          team.id === action.payload.teamId 
-            ? { 
-                ...team, 
-                score: team.score + action.payload.runs,
-                players: team.players.map(player => 
-                  player.id === state.currentBatsmen[action.payload.batsman]?.id
-                    ? {
-                        ...player,
-                        runs: player.runs + action.payload.runs,
-                        ballsFaced: player.ballsFaced + 1
-                      }
-                    : player
-                )
-              }
-            : team
-        ),
+        teams: updatedTeams,
         currentBatsmen: {
           ...state.currentBatsmen,
           [action.payload.batsman]: {
             ...state.currentBatsmen[action.payload.batsman],
             runs: state.currentBatsmen[action.payload.batsman].runs + action.payload.runs,
-            ballsFaced: state.currentBatsmen[action.payload.batsman].ballsFaced + 1
+            balls: state.currentBatsmen[action.payload.batsman].balls + 1
           }
         },
+        currentBowler: updatedBowler,
         currentOver: [...state.currentOver, action.payload],
-        ballCount: state.ballCount + 1,
-        lastAction: {
-          type: 'SCORE_RUNS',
-          payload: action.payload,
-          previousState: {
-            teams: state.teams,
-            currentBatsmen: state.currentBatsmen,
-            currentOver: state.currentOver,
-            ballCount: state.ballCount
-          }
-        }
+        ballCount: state.ballCount + 1
       };
-      return newState;
+    }
+
     
     case 'SCORE_EXTRA':
-      const ballCountIncrement = action.payload.extraType === 'wide' || action.payload.extraType === 'noball' ? 0 : 1;
       return {
         ...state,
         teams: state.teams.map(team => 
@@ -111,16 +100,9 @@ function matchReducer(state, action) {
             : team
         ),
         currentOver: [...state.currentOver, action.payload],
-        ballCount: state.ballCount + ballCountIncrement,
-        lastAction: {
-          type: 'SCORE_EXTRA',
-          payload: action.payload,
-          previousState: {
-            teams: state.teams,
-            currentOver: state.currentOver,
-            ballCount: state.ballCount
-          }
-        }
+        ballCount: action.payload.extraType === 'wide' || action.payload.extraType === 'noball' 
+          ? state.ballCount 
+          : state.ballCount + 1
       };
     
     case 'WICKET_TAKEN':
@@ -128,32 +110,7 @@ function matchReducer(state, action) {
         ...state,
         teams: state.teams.map(team => 
           team.id === action.payload.teamId 
-            ? { 
-                ...team, 
-                wickets: team.wickets + 1,
-                players: team.players.map(player => 
-                  player.id === state.currentBatsmen[action.payload.batsman]?.id
-                    ? {
-                        ...player,
-                        isOut: true,
-                        ballsFaced: player.ballsFaced + 1
-                      }
-                    : player
-                )
-              }
-            : team.id === action.payload.bowlingTeamId
-            ? {
-                ...team,
-                players: team.players.map(player => 
-                  player.id === state.currentBowler?.id
-                    ? {
-                        ...player,
-                        wickets: player.wickets + 1,
-                        oversBowled: player.oversBowled || 0
-                      }
-                    : player
-                )
-              }
+            ? { ...team, wickets: team.wickets + 1 }
             : team
         ),
         currentBatsmen: {
@@ -161,21 +118,11 @@ function matchReducer(state, action) {
           [action.payload.batsman]: {
             ...state.currentBatsmen[action.payload.batsman],
             isOut: true,
-            ballsFaced: state.currentBatsmen[action.payload.batsman].ballsFaced + 1
+            balls: state.currentBatsmen[action.payload.batsman].balls + 1
           }
         },
         currentOver: [...state.currentOver, action.payload],
-        ballCount: state.ballCount + 1,
-        lastAction: {
-          type: 'WICKET_TAKEN',
-          payload: action.payload,
-          previousState: {
-            teams: state.teams,
-            currentBatsmen: state.currentBatsmen,
-            currentOver: state.currentOver,
-            ballCount: state.ballCount
-          }
-        }
+        ballCount: state.ballCount + 1
       };
     
     case 'CHANGE_BOWLER':
@@ -210,36 +157,20 @@ function matchReducer(state, action) {
     case 'COMPLETE_OVER':
       return {
         ...state,
-        teams: state.teams.map(team => 
-          team.players.some(player => player.id === state.currentBowler?.id)
-            ? {
-                ...team,
-                players: team.players.map(player => 
-                  player.id === state.currentBowler?.id
-                    ? {
-                        ...player,
-                        oversBowled: (player.oversBowled || 0) + 1,
-                        runsConceded: (player.runsConceded || 0) + state.currentOver.reduce((total, ball) => total + (ball.runs || 0), 0)
-                      }
-                    : player
-                )
-              }
-            : team
-        ),
         overCount: state.overCount + 1,
         ballCount: 0,
         currentOver: [],
+        currentBowler: {
+          ...state.currentBowler,
+          overs: (state.currentBowler.overs || 0) + 1
+        },
         showBowlerChangeModal: true
       };
+
     
     case 'END_INNINGS':
       return {
         ...state,
-        teams: state.teams.map(team => 
-          team.id === (state.currentInnings === 1 ? state.battingFirst : (state.battingFirst === state.teams[0].id ? state.teams[1].id : state.teams[0].id))
-            ? { ...team, overs: state.overCount + (state.ballCount > 0 ? state.ballCount / 6 : 0) }
-            : team
-        ),
         currentInnings: state.currentInnings + 1,
         ballCount: 0,
         overCount: 0,
@@ -249,11 +180,6 @@ function matchReducer(state, action) {
     case 'END_MATCH':
       return {
         ...state,
-        teams: state.teams.map(team => 
-          team.id === (state.currentInnings === 1 ? state.battingFirst : (state.battingFirst === state.teams[0].id ? state.teams[1].id : state.teams[0].id))
-            ? { ...team, overs: state.overCount + (state.ballCount > 0 ? state.ballCount / 6 : 0) }
-            : team
-        ),
         matchStatus: 'finished',
         winner: action.payload.winner,
         winMargin: action.payload.winMargin,
@@ -279,19 +205,6 @@ function matchReducer(state, action) {
       return {
         ...state,
         [action.payload.modal]: false
-      };
-    
-    case 'UNDO_LAST_ACTION':
-      if (!state.lastAction) return state;
-      
-      const { previousState } = state.lastAction;
-      return {
-        ...state,
-        teams: previousState.teams,
-        currentBatsmen: previousState.currentBatsmen || state.currentBatsmen,
-        currentOver: previousState.currentOver,
-        ballCount: previousState.ballCount,
-        lastAction: null // Clear the last action after undo
       };
     
     case 'RESET_MATCH':
