@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Cricket Scorer</h1>
+  <p><a href="/players">Manage Players</a> | <a href="/matches/new">Start Match</a></p>
+
+  <h3>Recent Matches</h3>
+  <ul>
+    {% for m in matches %}
+      <li>
+        <strong>Match {{m.id}}</strong> - {{ m.created_at.strftime('%Y-%m-%d %H:%M:%S') }} -
+        {% if m.status %}{{ m.status }}{% endif %} |
+        {% if 'Ongoing' in m.status %}
+       <a href="{{ url_for('match', match_id=m.id) }}">Continue Match </a> |
+        {% endif %} 
+        
+        <a href="{{ url_for('match_summary', match_id=m.id) }}">Details</a>
+        {% set first = m.innings[0] if m.innings|length>=1 else None %}
+        {% if first %}
+          <div>First innings: {{ first.runs }} / {{ first.wickets }} in {{ (first.legal_balls//6) }}.{{ (first.legal_balls%6) }}</div>
+          <div>
+            Top batsmen:
+            {% set top = (first.player_innings | sort(attribute='runs') | reverse | list) %}
+            {% for pi in top[:3] %}
+              {{ pi.player.name }}({{ pi.runs }}){% if not loop.last %}, {% endif %}
+            {% endfor %}
+          </div>
+          <div>
+            Top bowlers:
+            {% set bowltop = (first.bowling_innings|sort(attribute='wickets')|reverse |list) %}
+            {% for bi in bowltop[:3] %}
+              {{ bi.player.name }} - {{ (bi.balls//6) }}.{{ (bi.balls%6) }} ov / {{ bi.runs_conceded }} / {{ bi.wickets }} wkts{% if not loop.last %}, {% endif %}
+            {% endfor %}
+          </div>
+          {% if m.innings|length >= 2 %}
+            {% set second = m.innings[1] %}
+            <div>Second innings: {{ second.runs }} / {{ second.wickets }} in {{ (second.legal_balls//6) }}.{{ (second.legal_balls%6) }}</div>
+            <div>Target: {{ first.runs + 1 }}</div>
+          {% endif %}
+        {% endif %}
+      </li>
+    {% else %}
+      <li>No matches yet</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

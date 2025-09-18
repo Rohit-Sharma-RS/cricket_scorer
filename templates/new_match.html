@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Start Match</h2>
+  <form method="post">
+    <label>Overs</label>
+    <input name="overs" value="12" required type="number" min="1" max="50">
+    <p>Teams are fixed: <strong>Team Bat First</strong> (left) vs <strong>Team Bowl First</strong> (right).</p>
+    <button type="submit">Create Match & Select Players</button>
+  </form>
+{% endblock %}

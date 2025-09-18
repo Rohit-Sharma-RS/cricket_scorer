@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cricket Scorer</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/">Home</a> |
+    <a href="/players">Players</a> |
+    <a href="/matches/new">New Match</a>
+  </nav>
+
+  <div class="flash">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for m in messages %}
+          <div class="msg">{{ m }}</div>
+          <script>
+            // show alert if this flash looks important
+            const msg = {{ m|tojson }};
+            if (msg.includes('Innings') || msg.includes('Completed') || msg.includes('Target')) {
+              alert(msg);
+            }
+          </script>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <div class="container">{% block content %}{% endblock %}</div>
+</body>
+</html>

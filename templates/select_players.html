@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Select Players for Match {{match.id}}</h2>
+<h3>{{match.team1.name}} vs {{match.team2.name}} ({{match.overs}} overs)</h3>
+
+<form method="post">
+  <div style="display: flex; gap: 40px; margin: 20px 0;">
+
+    <!-- Team 1 -->
+    <div style="flex: 1;">
+      <h4>{{ match.team1.name }} Players</h4>
+      {% for player in all_players %}
+        <div>
+          <label>
+            <input type="checkbox" name="team1_players" value="{{player.id}}">
+            {{ player.name }}
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Team 2 -->
+    <div style="flex: 1;">
+      <h4>{{ match.team2.name }} Players</h4>
+      {% for player in all_players %}
+        <div>
+          <label>
+            <input type="checkbox" name="team2_players" value="{{player.id}}">
+            {{ player.name }}
+          </label>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+  <button type="submit">Save Teams</button>
+</form>
+{% endblock %}

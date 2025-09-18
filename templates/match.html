@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h2>Match {{match.id}}</h2>
+  <p>Status: {{match.status}}</p>
+
+  {% if innings %}
+    <h3>Innings {{innings.number}} - Batting: {{innings.batting_team.name}}</h3>
+    <p>Score: <strong>{{innings.runs}} / {{innings.wickets}}</strong> in {{(innings.legal_balls//6)}}.{{(innings.legal_balls%6)}}</p>
+
+    {% if innings.number == 2 %}
+      {% set first = match.innings[0] if match.innings|length >= 1 else None %}
+      {% if first %}
+        <p>Target: <strong>{{ first.runs + 1 }}</strong></p>
+        {% set need = (first.runs + 1) - innings.runs %}
+        {% set balls_left = (match.overs * 6) - innings.legal_balls %}
+        <p>Need <strong>{{ need if need>0 else 0 }}</strong> runs in <strong>{{ balls_left if balls_left>0 else 0 }}</strong> balls.</p>
+      {% endif %}
+    {% endif %}
+
+    <!-- Choose openers if not set -->
+    {% if not innings.striker_id or not innings.non_striker_id %}
+      <h4>Choose Openers</h4>
+      <form method="post" action="{{ url_for('set_openers', match_id=match.id) }}">
+        <label>Opener 1 (striker)</label>
+        <select name="opener1" required>
+          {% for p in batting_players %}
+            <option value="{{p.id}}">{{p.name}}</option>
+          {% endfor %}
+        </select>
+        <label>Opener 2 (non-striker)</label>
+        <select name="opener2" required>
+          {% for p in batting_players %}
+            <option value="{{p.id}}">{{p.name}}</option>
+          {% endfor %}
+        </select>
+        <button type="submit">Set Openers</button>
+      </form>
+    {% endif %}
+
+    <h4>Current batsmen</h4>
+    <ul>
+      {% for pi in innings.player_innings %}
+        <li>
+          {{pi.player.name}} - {{pi.runs}}({{pi.balls}})
+          {% if innings.striker_id == pi.player_id %}[S]{% elif innings.non_striker_id == pi.player_id %}[NS]{% endif %}
+          {% if pi.retired %} [Retired]{% endif %}
+          {% if not pi.out and not pi.retired %}
+            <form style="display:inline" method="post" action="{{ url_for('switch_batsman', match_id=match.id) }}">
+              <input type="hidden" name="player_id" value="{{pi.player_id}}">
+              <button type="submit">Make Striker</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+
+    <h4>Add (sub) batsman</h4>
+    <form method="post" action="{{ url_for('add_batsman', match_id=match.id) }}">
+      <select name="player_id">
+        {% for p in bench_players %}
+          <option value="{{p.id}}">{{p.name}}</option>
+        {% endfor %}
+      </select>
+      <label><input type="checkbox" name="make_striker"> Make striker</label>
+      <button type="submit">Add</button>
+    </form>
+
+    <h4>Score a ball</h4>
+    <form method="post" action="{{ url_for('add_ball', match_id=match.id) }}">
+      <label>Striker</label>
+      <select name="striker">
+        <option value="">--use current striker--</option>
+        {% for p in batting_players %}
+          <option value="{{p.id}}" {% if innings.striker_id == p.id %}selected{% endif %}>{{p.name}}</option>
+        {% endfor %}
+      </select>
+
+      <label>Bowler</label>
+      <select name="bowler" required>
+        <option value="">--select--</option>
+        {% for p in bowling_players %}
+        <option value="{{p.id}}" {% if innings.current_bowler_id == p.id %}selected{% endif %}>{{p.name}}</option>
+        {% endfor %}
+      </select>
+
+      <label>Runs</label>
+      <div class="runs">
+        {% for r in range(0,7) %}
+          <button name="runs" value="{{r}}" type="submit">{{r}}</button>
+        {% endfor %}
+      </div>
+
+      <label>Extras / No-ball options</label>
+      <div class="runs">
+        <button name="extras" value="" type="submit">None</button>
+        <button name="extras" value="NB" type="submit">NB</button>
+        <button name="extras" value="NB+1" type="submit">NB+1</button>
+        <button name="extras" value="NB+2" type="submit">NB+2</button>
+        <button name="extras" value="NB+4" type="submit">NB+4</button>
+        <button name="extras" value="NB+6" type="submit">NB+6</button>
+        <button name="extras" value="WD" type="submit">WD</button>
+      </div>
+    </form>
+
+    <h4>Record a wicket</h4>
+    <!-- dedicated wicket form: wicket_type is required here -->
+    <form method="post" action="{{ url_for('add_ball', match_id=match.id) }}">
+      <input type="hidden" name="runs" value="0">
+      <label>Bowler</label>
+      <select name="bowler" required>
+        {% for p in bowling_players %}
+          <option value="{{p.id}}">{{p.name}}</option>
+        {% endfor %}
+      </select>
+      <label>Wicket type</label>
+      <select name="wicket_type" required>
+        <option value="">--select--</option>
+        <option value="bowled">Bowled</option>
+        <option value="caught">Caught</option>
+        <option value="run-out">Run-out</option>
+        <option value="stumped">Stumped</option>
+      </select>
+      <label>Fielder who took wicket (optional)</label>
+      <select name="wicket_taker">
+        <option value="">--none--</option>
+        {% for p in bowling_players %}
+          <option value="{{p.id}}">{{p.name}}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Record Wicket</button>
+    </form>
+
+    <h4>Bowling stats (this innings)</h4>
+    <ul>
+      {% for bi in bowling_stats %}
+        <li>
+          {{bi.player.name}} - Overs: {{ (bi.balls//6) }}.{{ (bi.balls%6) }} | Runs: {{bi.runs_conceded}} | Wkts: {{bi.wickets}}
+        </li>
+      {% else %}
+        <li>No bowlers recorded yet</li>
+      {% endfor %}
+    </ul>
+    
+    <h4>Actions</h4>
+
+    <form method="post" action="{{ url_for('retire_batsman', match_id=match.id) }}">
+      <select name="player_id">
+        {% for pi in innings.player_innings %}
+          <option value="{{pi.player_id}}">{{pi.player.name}}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Retire Batsman</button>
+    </form>
+
+    <form method="post" action="{{ url_for('end_innings', match_id=match.id) }}">
+      <button type="submit">End Innings Early</button>
+    </form>
+
+    <form method="post" action="{{ url_for('baby_over', match_id=match.id) }}">
+  <button type="submit" style="background-color: orange; color: white; padding: 8px 15px;">
+    Make Baby Over
+  </button>
+</form>
+
+
+    <form method="post" action="{{ url_for('end_match', match_id=match.id) }}">
+      <button type="submit">End Match</button>
+    </form>
+    <h4>Recent events</h4>
+    <ul>
+      {% for e in innings.ball_events|sort(attribute='created_at') %}
+        <li>
+          {{ e.created_at.strftime('%Y-%m-%d %H:%M:%S') }} -
+          {% if e.bowler %}{{ e.bowler.name }} to {% endif %}
+          {% if e.striker %}{{ e.striker.name }}{% else %}unknown batsman{% endif %} :
+          {{ e.runs }}{% if e.extras %} + {{ e.extras }}{% endif %}
+          {% if e.wicket_type %} - Wicket: {{ e.wicket_type }}{% if e.wicket_taker %} (by {{ e.wicket_taker.name }}){% endif %}{% endif %}
+        </li>
+      {% else %}
+        <li>No events yet</li>
+      {% endfor %}
+    </ul>
+      
+  {% else %}
+    <p>No active innings</p>
+  {% endif %}
+{% endblock %}

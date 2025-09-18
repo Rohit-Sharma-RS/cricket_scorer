@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Match {{ match.id }} Summary</h2>
+<p>Status: {{ match.status }}</p>
+
+<!-- Show team players used -->
+<h3>Teams</h3>
+<div style="display: flex; gap: 50px;">
+  <div>
+    <h4>{{ match.team1.name }}</h4>
+    <ul>
+      {% for mtp in match.match_players if mtp.team_id == match.team1_id %}
+        <li>{{ mtp.player.name }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+  <div>
+    <h4>{{ match.team2.name }}</h4>
+    <ul>
+      {% for mtp in match.match_players if mtp.team_id == match.team2_id %}
+        <li>{{ mtp.player.name }}</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<hr>
+
+{% for inns in match.innings %}
+  <h3>Innings {{ inns.number }} - {{ inns.batting_team.name }}</h3>
+  <p><strong>{{ inns.runs }}/{{ inns.wickets }}</strong> in {{ inns.legal_balls // 6 }}.{{ inns.legal_balls % 6 }} overs</p>
+
+  <!-- Batting Scorecard -->
+  <h4>Batting</h4>
+  <table border="1" cellpadding="5">
+    <tr><th>Batsman</th><th>Runs</th><th>Balls</th><th>Status</th></tr>
+    {% for pi in inns.player_innings %}
+      <tr>
+        <td>{{ pi.player.name }}</td>
+        <td>{{ pi.runs }}</td>
+        <td>{{ pi.balls }}</td>
+        <td>
+          {% if pi.out %}Out{% elif pi.retired %}Retired{% else %}Not Out{% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4">No batting records</td></tr>
+    {% endfor %}
+  </table>
+
+  <!-- Bowling Scorecard -->
+  <h4>Bowling</h4>
+  <table border="1" cellpadding="5">
+    <tr><th>Bowler</th><th>Overs</th><th>Runs</th><th>Wickets</th><th>Economy</th></tr>
+    {% for bi in inns.bowling_innings %}
+      <tr>
+        <td>{{ bi.player.name }}</td>
+        <td>{{ bi.balls // 6 }}.{{ bi.balls % 6 }}</td>
+        <td>{{ bi.runs_conceded }}</td>
+        <td>{{ bi.wickets }}</td>
+        <td>
+          {% if bi.balls > 0 %}
+            {{ (bi.runs_conceded / (bi.balls / 6)) | round(2) }}
+          {% else %}
+            -
+          {% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5">No bowling records</td></tr>
+    {% endfor %}
+  </table>
+
+  <hr>
+{% endfor %}
+
+<!-- Show target if second innings exists -->
+{% if match.innings|length >= 2 %}
+  {% set first = match.innings[0] %}
+  {% set second = match.innings[1] %}
+  <p><strong>Target:</strong> {{ first.runs + 1 }} | 
+     <strong>Result:</strong> {{ match.status }}</p>
+{% endif %}
+
+<a href="{{ url_for('index') }}">Back to Home</a>
+{% endblock %}
