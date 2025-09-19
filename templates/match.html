@@ -1,187 +1,353 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h2>Match {{match.id}}</h2>
-  <p>Status: {{match.status}}</p>
+<section class="match-header">
+  <div class="match-info">
+    <h1 class="match-title">Match {{ match.id }}</h1>
+    <span class="match-status {{ 'status-ongoing' if 'Ongoing' in match.status else 'status-completed' }}">
+      {{ match.status }}
+    </span>
+  </div>
+</section>
 
-  {% if innings %}
-    <h3>Innings {{innings.number}} - Batting: {{innings.batting_team.name}}</h3>
-    <p>Score: <strong>{{innings.runs}} / {{innings.wickets}}</strong> in {{(innings.legal_balls//6)}}.{{(innings.legal_balls%6)}}</p>
+{% if innings %}
+  <section class="innings-overview">
+    <div class="innings-header">
+      <h2 class="innings-title">Innings {{ innings.number }}</h2>
+      <p class="batting-team">{{ innings.batting_team.name }} Batting</p>
+    </div>
+    
+    <div class="score-summary">
+      <div class="main-score">
+        <span class="score-runs">{{ innings.runs }}</span>
+        <span class="score-separator">/</span>
+        <span class="score-wickets">{{ innings.wickets }}</span>
+      </div>
+      <div class="score-details">
+        <span class="score-overs">{{ (innings.legal_balls//6) }}.{{ (innings.legal_balls%6) }} overs</span>
+      </div>
+    </div>
 
     {% if innings.number == 2 %}
       {% set first = match.innings[0] if match.innings|length >= 1 else None %}
       {% if first %}
-        <p>Target: <strong>{{ first.runs + 1 }}</strong></p>
-        {% set need = (first.runs + 1) - innings.runs %}
-        {% set balls_left = (match.overs * 6) - innings.legal_balls %}
-        <p>Need <strong>{{ need if need>0 else 0 }}</strong> runs in <strong>{{ balls_left if balls_left>0 else 0 }}</strong> balls.</p>
+        <div class="target-info">
+          <div class="target-card">
+            <h3 class="target-title">Target: {{ first.runs + 1 }}</h3>
+            {% set need = (first.runs + 1) - innings.runs %}
+            {% set balls_left = (match.overs * 6) - innings.legal_balls %}
+            <p class="target-details">
+              Need <strong>{{ need if need>0 else 0 }}</strong> runs in 
+              <strong>{{ balls_left if balls_left>0 else 0 }}</strong> balls
+            </p>
+          </div>
+        </div>
       {% endif %}
     {% endif %}
+  </section>
 
-    <!-- Choose openers if not set -->
-    {% if not innings.striker_id or not innings.non_striker_id %}
-      <h4>Choose Openers</h4>
-      <form method="post" action="{{ url_for('set_openers', match_id=match.id) }}">
-        <label>Opener 1 (striker)</label>
-        <select name="opener1" required>
-          {% for p in batting_players %}
-            <option value="{{p.id}}">{{p.name}}</option>
-          {% endfor %}
-        </select>
-        <label>Opener 2 (non-striker)</label>
-        <select name="opener2" required>
-          {% for p in batting_players %}
-            <option value="{{p.id}}">{{p.name}}</option>
-          {% endfor %}
-        </select>
-        <button type="submit">Set Openers</button>
-      </form>
-    {% endif %}
-
-    <h4>Current batsmen</h4>
-    <ul>
-      {% for pi in innings.player_innings %}
-        <li>
-          {{pi.player.name}} - {{pi.runs}}({{pi.balls}})
-          {% if innings.striker_id == pi.player_id %}[S]{% elif innings.non_striker_id == pi.player_id %}[NS]{% endif %}
-          {% if pi.retired %} [Retired]{% endif %}
-          {% if not pi.out and not pi.retired %}
-            <form style="display:inline" method="post" action="{{ url_for('switch_batsman', match_id=match.id) }}">
-              <input type="hidden" name="player_id" value="{{pi.player_id}}">
-              <button type="submit">Make Striker</button>
-            </form>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-
-    <h4>Add (sub) batsman</h4>
-    <form method="post" action="{{ url_for('add_batsman', match_id=match.id) }}">
-      <select name="player_id">
-        {% for p in bench_players %}
-          <option value="{{p.id}}">{{p.name}}</option>
-        {% endfor %}
-      </select>
-      <label><input type="checkbox" name="make_striker"> Make striker</label>
-      <button type="submit">Add</button>
-    </form>
-
-    <h4>Score a ball</h4>
-    <form method="post" action="{{ url_for('add_ball', match_id=match.id) }}">
-      <label>Striker</label>
-      <select name="striker">
-        <option value="">--use current striker--</option>
-        {% for p in batting_players %}
-          <option value="{{p.id}}" {% if innings.striker_id == p.id %}selected{% endif %}>{{p.name}}</option>
-        {% endfor %}
-      </select>
-
-      <label>Bowler</label>
-      <select name="bowler" required>
-        <option value="">--select--</option>
-        {% for p in bowling_players %}
-        <option value="{{p.id}}" {% if innings.current_bowler_id == p.id %}selected{% endif %}>{{p.name}}</option>
-        {% endfor %}
-      </select>
-
-      <label>Runs</label>
-      <div class="runs">
-        {% for r in range(0,7) %}
-          <button name="runs" value="{{r}}" type="submit">{{r}}</button>
-        {% endfor %}
+  <!-- Choose Openers Section -->
+  {% if not innings.striker_id or not innings.non_striker_id %}
+    <section class="openers-selection">
+      <div class="card card-primary">
+        <div class="card-header">
+          <h3 class="card-title">Choose Opening Batsmen</h3>
+          <p class="card-subtitle">Select two players to start the innings</p>
+        </div>
+        <form method="post" action="{{ url_for('set_openers', match_id=match.id) }}" class="openers-form">
+          <div class="form-group">
+            <label for="opener1" class="form-label">Opener 1 (Striker)</label>
+            <select name="opener1" id="opener1" class="form-select" required>
+              <option value="">Select striker...</option>
+              {% for p in batting_players %}
+                <option value="{{ p.id }}">{{ p.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="opener2" class="form-label">Opener 2 (Non-striker)</label>
+            <select name="opener2" id="opener2" class="form-select" required>
+              <option value="">Select non-striker...</option>
+              {% for p in batting_players %}
+                <option value="{{ p.id }}">{{ p.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg">Set Openers</button>
+        </form>
       </div>
-
-      <label>Extras / No-ball options</label>
-      <div class="runs">
-        <button name="extras" value="" type="submit">None</button>
-        <button name="extras" value="NB" type="submit">NB</button>
-        <button name="extras" value="NB+1" type="submit">NB+1</button>
-        <button name="extras" value="NB+2" type="submit">NB+2</button>
-        <button name="extras" value="NB+4" type="submit">NB+4</button>
-        <button name="extras" value="NB+6" type="submit">NB+6</button>
-        <button name="extras" value="WD" type="submit">WD</button>
-      </div>
-    </form>
-
-    <h4>Record a wicket</h4>
-    <!-- dedicated wicket form: wicket_type is required here -->
-    <form method="post" action="{{ url_for('add_ball', match_id=match.id) }}">
-      <input type="hidden" name="runs" value="0">
-      <label>Bowler</label>
-      <select name="bowler" required>
-        {% for p in bowling_players %}
-          <option value="{{p.id}}">{{p.name}}</option>
-        {% endfor %}
-      </select>
-      <label>Wicket type</label>
-      <select name="wicket_type" required>
-        <option value="">--select--</option>
-        <option value="bowled">Bowled</option>
-        <option value="caught">Caught</option>
-        <option value="run-out">Run-out</option>
-        <option value="stumped">Stumped</option>
-      </select>
-      <label>Fielder who took wicket (optional)</label>
-      <select name="wicket_taker">
-        <option value="">--none--</option>
-        {% for p in bowling_players %}
-          <option value="{{p.id}}">{{p.name}}</option>
-        {% endfor %}
-      </select>
-      <button type="submit">Record Wicket</button>
-    </form>
-
-    <h4>Bowling stats (this innings)</h4>
-    <ul>
-      {% for bi in bowling_stats %}
-        <li>
-          {{bi.player.name}} - Overs: {{ (bi.balls//6) }}.{{ (bi.balls%6) }} | Runs: {{bi.runs_conceded}} | Wkts: {{bi.wickets}}
-        </li>
-      {% else %}
-        <li>No bowlers recorded yet</li>
-      {% endfor %}
-    </ul>
-    
-    <h4>Actions</h4>
-
-    <form method="post" action="{{ url_for('retire_batsman', match_id=match.id) }}">
-      <select name="player_id">
-        {% for pi in innings.player_innings %}
-          <option value="{{pi.player_id}}">{{pi.player.name}}</option>
-        {% endfor %}
-      </select>
-      <button type="submit">Retire Batsman</button>
-    </form>
-
-    <form method="post" action="{{ url_for('end_innings', match_id=match.id) }}">
-      <button type="submit">End Innings Early</button>
-    </form>
-
-    <form method="post" action="{{ url_for('baby_over', match_id=match.id) }}">
-  <button type="submit" style="background-color: orange; color: white; padding: 8px 15px;">
-    Make Baby Over
-  </button>
-</form>
-
-
-    <form method="post" action="{{ url_for('end_match', match_id=match.id) }}">
-      <button type="submit">End Match</button>
-    </form>
-    <h4>Recent events</h4>
-    <ul>
-      {% for e in innings.ball_events|sort(attribute='created_at') %}
-        <li>
-          {{ e.created_at.strftime('%Y-%m-%d %H:%M:%S') }} -
-          {% if e.bowler %}{{ e.bowler.name }} to {% endif %}
-          {% if e.striker %}{{ e.striker.name }}{% else %}unknown batsman{% endif %} :
-          {{ e.runs }}{% if e.extras %} + {{ e.extras }}{% endif %}
-          {% if e.wicket_type %} - Wicket: {{ e.wicket_type }}{% if e.wicket_taker %} (by {{ e.wicket_taker.name }}){% endif %}{% endif %}
-        </li>
-      {% else %}
-        <li>No events yet</li>
-      {% endfor %}
-    </ul>
-      
+    </section>
   {% else %}
-    <p>No active innings</p>
+    <!-- Main Scoring Interface -->
+    <div class="scoring-interface">
+      <!-- Current Batsmen -->
+      <section class="current-batsmen">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Current Batsmen</h3>
+          </div>
+          <div class="batsmen-list">
+            {% for pi in innings.player_innings %}
+              <div class="batsman-card {{ 'striker' if innings.striker_id == pi.player_id else 'non-striker' if innings.non_striker_id == pi.player_id else '' }}">
+                <div class="batsman-info">
+                  <h4 class="batsman-name">{{ pi.player.name }}</h4>
+                  <div class="batsman-stats">
+                    <span class="runs">{{ pi.runs }}</span>
+                    <span class="balls">({{ pi.balls }})</span>
+                  </div>
+                  {% if innings.striker_id == pi.player_id %}
+                    <span class="batsman-role striker-badge">Striker</span>
+                  {% elif innings.non_striker_id == pi.player_id %}
+                    <span class="batsman-role non-striker-badge">Non-striker</span>
+                  {% endif %}
+                  {% if pi.retired %}
+                    <span class="batsman-status retired">Retired</span>
+                  {% endif %}
+                </div>
+                {% if not pi.out and not pi.retired %}
+                  <form method="post" action="{{ url_for('switch_batsman', match_id=match.id) }}" class="switch-form">
+                    <input type="hidden" name="player_id" value="{{ pi.player_id }}">
+                    <button type="submit" class="btn btn-sm btn-secondary">Make Striker</button>
+                  </form>
+                {% endif %}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <!-- Scoring Buttons -->
+      <section class="scoring-section">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Score a Ball</h3>
+          </div>
+          <form method="post" action="{{ url_for('add_ball', match_id=match.id) }}" class="scoring-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="striker" class="form-label">Striker</label>
+                <select name="striker" id="striker" class="form-select">
+                  <option value="">Use current striker</option>
+                  {% for p in batting_players %}
+                    <option value="{{ p.id }}" {% if innings.striker_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="bowler" class="form-label">Bowler</label>
+                <select name="bowler" id="bowler" class="form-select" required>
+                  <option value="">Select bowler...</option>
+                  {% for p in bowling_players %}
+                    <option value="{{ p.id }}" {% if innings.current_bowler_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <!-- Run Buttons -->
+            <div class="runs-section">
+              <h4 class="runs-title">Runs</h4>
+              <div class="runs-grid">
+                {% for r in range(0,7) %}
+                  <button name="runs" value="{{ r }}" type="submit" class="btn-run btn-run-{{ r }}">{{ r }}</button>
+                {% endfor %}
+              </div>
+            </div>
+
+            <!-- Extras Buttons -->
+            <div class="extras-section">
+              <h4 class="extras-title">Extras</h4>
+              <div class="extras-grid">
+                <button name="extras" value="" type="submit" class="btn-extra">None</button>
+                <button name="extras" value="NB" type="submit" class="btn-extra">No Ball</button>
+                <button name="extras" value="NB+1" type="submit" class="btn-extra">NB+1</button>
+                <button name="extras" value="NB+2" type="submit" class="btn-extra">NB+2</button>
+                <button name="extras" value="NB+4" type="submit" class="btn-extra">NB+4</button>
+                <button name="extras" value="NB+6" type="submit" class="btn-extra">NB+6</button>
+                <button name="extras" value="WD" type="submit" class="btn-extra">Wide</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Wicket Section -->
+      <section class="wicket-section">
+        <div class="card card-danger">
+          <div class="card-header">
+            <h3 class="card-title">Record Wicket</h3>
+          </div>
+          <form method="post" action="{{ url_for('add_ball', match_id=match.id) }}" class="wicket-form">
+            <input type="hidden" name="runs" value="0">
+            <div class="form-row">
+              <div class="form-group">
+                <label for="wicket-bowler" class="form-label">Bowler</label>
+                <select name="bowler" id="wicket-bowler" class="form-select" required>
+                  <option value="">Select bowler...</option>
+                  {% for p in bowling_players %}
+                    <option value="{{ p.id }}">{{ p.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="wicket_type" class="form-label">Wicket Type</label>
+                <select name="wicket_type" id="wicket_type" class="form-select" required>
+                  <option value="">Select type...</option>
+                  <option value="bowled">Bowled</option>
+                  <option value="caught">Caught</option>
+                  <option value="run-out">Run Out</option>
+                  <option value="stumped">Stumped</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="wicket_taker" class="form-label">Fielder (Optional)</label>
+                <select name="wicket_taker" id="wicket_taker" class="form-select">
+                  <option value="">None</option>
+                  {% for p in bowling_players %}
+                    <option value="{{ p.id }}">{{ p.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-danger btn-lg">Record Wicket</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Add Batsman -->
+      <section class="add-batsman-section">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Add New Batsman</h3>
+          </div>
+          <form method="post" action="{{ url_for('add_batsman', match_id=match.id) }}" class="add-batsman-form">
+            <div class="form-row">
+              <div class="form-group">
+                <select name="player_id" class="form-select" required>
+                  <option value="">Select player...</option>
+                  {% for p in bench_players %}
+                    <option value="{{ p.id }}">{{ p.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="make_striker" class="checkbox">
+                  <span class="checkbox-text">Make striker</span>
+                </label>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-secondary">Add Batsman</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- Bowling Stats -->
+      <section class="bowling-stats">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Bowling Statistics</h3>
+          </div>
+          <div class="bowling-table-container">
+            <table class="bowling-table">
+              <thead>
+                <tr>
+                  <th>Bowler</th>
+                  <th>Overs</th>
+                  <th>Runs</th>
+                  <th>Wickets</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for bi in bowling_stats %}
+                  <tr>
+                    <td class="bowler-name">{{ bi.player.name }}</td>
+                    <td class="bowler-overs">{{ (bi.balls//6) }}.{{ (bi.balls%6) }}</td>
+                    <td class="bowler-runs">{{ bi.runs_conceded }}</td>
+                    <td class="bowler-wickets">{{ bi.wickets }}</td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="4" class="no-data">No bowling records yet</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Recent Events -->
+      <section class="recent-events">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Events</h3>
+          </div>
+          <div class="events-container">
+            {% for e in innings.ball_events|sort(attribute='created_at')|reverse %}
+              <div class="event-item">
+                <div class="event-time">{{ e.created_at.strftime('%H:%M:%S') }}</div>
+                <div class="event-description">
+                  {% if e.bowler %}{{ e.bowler.name }} to {% endif %}
+                  {% if e.striker %}{{ e.striker.name }}{% else %}unknown batsman{% endif %}:
+                  <span class="event-runs">{{ e.runs }}</span>
+                  {% if e.extras %}<span class="event-extras"> + {{ e.extras }}</span>{% endif %}
+                  {% if e.wicket_type %}
+                    <span class="event-wicket"> - Wicket: {{ e.wicket_type }}
+                      {% if e.wicket_taker %} (by {{ e.wicket_taker.name }}){% endif %}
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            {% else %}
+              <div class="no-events">No events recorded yet</div>
+            {% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <!-- Danger Zone -->
+      <section class="danger-zone">
+        <div class="card card-danger">
+          <div class="card-header">
+            <h3 class="card-title">⚠️ Danger Zone</h3>
+            <p class="card-subtitle">Use these actions carefully</p>
+          </div>
+          <div class="danger-actions">
+            <form method="post" action="{{ url_for('retire_batsman', match_id=match.id) }}" class="danger-form">
+              <select name="player_id" class="form-select" required>
+                <option value="">Select batsman to retire...</option>
+                {% for pi in innings.player_innings %}
+                  <option value="{{ pi.player_id }}">{{ pi.player.name }}</option>
+                {% endfor %}
+              </select>
+              <button type="submit" class="btn btn-warning">Retire Batsman</button>
+            </form>
+
+            <form method="post" action="{{ url_for('baby_over', match_id=match.id) }}" class="danger-form">
+              <button type="submit" class="btn btn-warning">Make Baby Over</button>
+            </form>
+
+            <form method="post" action="{{ url_for('end_innings', match_id=match.id) }}" class="danger-form">
+              <button type="submit" class="btn btn-danger">End Innings Early</button>
+            </form>
+
+            <form method="post" action="{{ url_for('end_match', match_id=match.id) }}" class="danger-form">
+              <button type="submit" class="btn btn-danger">End Match</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </div>
   {% endif %}
+{% else %}
+  <section class="no-innings">
+    <div class="empty-state">
+      <div class="empty-state-icon">🏏</div>
+      <h3 class="empty-state-title">No Active Innings</h3>
+      <p class="empty-state-text">The match hasn't started yet or has ended</p>
+      <a href="{{ url_for('index') }}" class="btn btn-primary">Back to Home</a>
+    </div>
+  </section>
+{% endif %}
 {% endblock %}
+

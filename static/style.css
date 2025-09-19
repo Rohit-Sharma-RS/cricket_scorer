@@ -1,6 +1,1566 @@
-body{font-family:Arial,Helvetica,sans-serif;margin:12px}
-nav{margin-bottom:10px}
-.container{padding:8px}
-.msg{background:#eef;padding:6px;margin:6px 0}
-button{margin:2px}
-.runs button{width:48px}
+/* Cricket Scorer - Professional Mobile-First CSS */
+
+/* ===== CSS RESET & BASE STYLES ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background-color: #f8fafc;
+  color: #1e293b;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== CSS CUSTOM PROPERTIES ===== */
+:root {
+  /* Colors */
+  --primary: #1e40af;
+  --primary-light: #3b82f6;
+  --primary-dark: #1e3a8a;
+  --secondary: #059669;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --background: #f8fafc;
+  --surface: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* Border radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  
+  /* Transitions */
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+}
+
+/* ===== LAYOUT COMPONENTS ===== */
+
+/* Header & Navigation */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav {
+  padding: var(--space-md) 0;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.nav-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.nav-brand-link {
+  text-decoration: none;
+  color: inherit;
+  transition: color var(--transition-fast);
+}
+
+.nav-brand-link:hover {
+  color: var(--primary-light);
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: var(--space-lg);
+  align-items: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.nav-link:hover {
+  color: var(--primary);
+  background-color: var(--border-light);
+}
+
+.nav-link-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.nav-link-primary:hover {
+  background-color: var(--primary-dark);
+  color: white;
+}
+
+/* Main Content */
+.main {
+  flex: 1;
+  padding: var(--space-xl) 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+/* Footer */
+.footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: var(--space-lg) 0;
+  margin-top: auto;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+  text-align: center;
+}
+
+.footer-text {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* ===== FLASH MESSAGES ===== */
+.flash-container {
+  position: fixed;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: 1000;
+  max-width: 400px;
+}
+
+.flash-message {
+  background: var(--primary);
+  color: white;
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  margin-bottom: var(--space-sm);
+  animation: slideIn 0.3s ease-out;
+}
+
+.flash-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color var(--transition-fast);
+}
+
+.flash-close:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ===== CARD COMPONENTS ===== */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  margin-bottom: var(--space-xl);
+}
+
+.card-primary {
+  border-top: 4px solid var(--primary);
+}
+
+.card-danger {
+  border-top: 4px solid var(--danger);
+}
+
+.card-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  background: var(--border-light);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.card-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* ===== BUTTON COMPONENTS ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 44px; /* Touch-friendly */
+  font-size: 0.875rem;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-sm {
+  padding: var(--space-xs) var(--space-sm);
+  font-size: 0.75rem;
+  min-height: 36px;
+}
+
+.btn-lg {
+  padding: var(--space-md) var(--space-xl);
+  font-size: 1rem;
+  min-height: 52px;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+  background-color: var(--text-secondary);
+  color: white;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background-color: var(--success);
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.btn-warning {
+  background-color: var(--warning);
+  color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background-color: #d97706;
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* ===== FORM COMPONENTS ===== */
+.form-group {
+  margin-bottom: var(--space-lg);
+}
+
+.form-row {
+  display: flex;
+  gap: var(--space-md);
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color var(--transition-fast);
+  min-height: 44px;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-help {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: var(--space-xs);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-xl);
+}
+
+/* Checkbox Styling */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.checkbox-text {
+  font-weight: 500;
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+  text-align: center;
+  padding: var(--space-2xl) 0;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+  color: white;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-2xl);
+}
+
+.hero-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-md);
+}
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  opacity: 0.9;
+  margin-bottom: var(--space-xl);
+}
+
+.hero-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ===== SECTION COMPONENTS ===== */
+.section-header {
+  margin-bottom: var(--space-xl);
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.section-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+}
+
+/* ===== MATCH COMPONENTS ===== */
+
+/* Match Cards Grid */
+.matches-grid {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+.match-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.match-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.match-card-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.match-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.match-card-date {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.match-status {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-ongoing {
+  background-color: var(--success);
+  color: white;
+}
+
+.status-completed {
+  background-color: var(--text-secondary);
+  color: white;
+}
+
+.match-card-content {
+  padding: var(--space-lg);
+}
+
+.innings-summary {
+  margin-bottom: var(--space-lg);
+}
+
+.score-display {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.score-runs {
+  color: var(--primary);
+}
+
+.score-separator {
+  color: var(--text-secondary);
+  margin: 0 var(--space-xs);
+}
+
+.score-wickets {
+  color: var(--danger);
+}
+
+.score-overs {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin-left: var(--space-sm);
+}
+
+.innings-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.target-info {
+  font-size: 0.875rem;
+  color: var(--warning);
+  font-weight: 500;
+}
+
+.player-stats {
+  display: grid;
+  gap: var(--space-lg);
+}
+
+.stats-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.stats-list {
+  list-style: none;
+}
+
+.stats-item {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.match-card-footer {
+  padding: var(--space-lg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+/* ===== MATCH INTERFACE ===== */
+
+/* Match Header */
+.match-header {
+  margin-bottom: var(--space-xl);
+}
+
+.match-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.match-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Innings Overview */
+.innings-overview {
+  margin-bottom: var(--space-xl);
+}
+
+.innings-header {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.innings-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.batting-team {
+  color: var(--text-secondary);
+  font-size: 1.125rem;
+}
+
+.score-summary {
+  text-align: center;
+  background: var(--surface);
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-lg);
+}
+
+.main-score {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.score-details {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+}
+
+.target-info {
+  margin-bottom: var(--space-xl);
+}
+
+.target-card {
+  background: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%);
+  color: white;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  text-align: center;
+}
+
+.target-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: var(--space-sm);
+}
+
+.target-details {
+  font-size: 1.125rem;
+  opacity: 0.9;
+}
+
+/* Openers Selection */
+.openers-selection {
+  margin-bottom: var(--space-xl);
+}
+
+.openers-form {
+  padding: var(--space-lg);
+}
+
+/* Scoring Interface */
+.scoring-interface {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+/* Current Batsmen */
+.batsmen-list {
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.batsman-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.batsman-card.striker {
+  border-color: var(--primary);
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.batsman-card.non-striker {
+  border-color: var(--secondary);
+  background-color: rgba(5, 150, 105, 0.05);
+}
+
+.batsman-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.batsman-name {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.batsman-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.runs {
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.balls {
+  color: var(--text-secondary);
+}
+
+.batsman-role {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.striker-badge {
+  background-color: var(--primary);
+  color: white;
+}
+
+.non-striker-badge {
+  background-color: var(--secondary);
+  color: white;
+}
+
+.batsman-status.retired {
+  background-color: var(--warning);
+  color: white;
+}
+
+.switch-form {
+  display: inline;
+}
+
+/* Scoring Buttons */
+.scoring-form {
+  padding: var(--space-lg);
+}
+
+.runs-section,
+.extras-section {
+  margin-top: var(--space-lg);
+}
+
+.runs-title,
+.extras-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+}
+
+.runs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: var(--space-sm);
+  max-width: 500px;
+}
+
+.btn-run {
+  aspect-ratio: 1;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 60px;
+}
+
+.btn-run-0 { background-color: var(--text-secondary); color: white; }
+.btn-run-1,
+.btn-run-2,
+.btn-run-3 { background-color: var(--success); color: white; }
+.btn-run-4 { background-color: var(--primary); color: white; }
+.btn-run-6 { background-color: var(--warning); color: white; }
+
+.btn-run:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.extras-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: var(--space-sm);
+  max-width: 600px;
+}
+
+.btn-extra {
+  padding: var(--space-sm);
+  background-color: var(--primary-light);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 44px;
+}
+
+.btn-extra:hover {
+  background-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+/* Wicket Section */
+.wicket-form {
+  padding: var(--space-lg);
+}
+
+/* Add Batsman */
+.add-batsman-form {
+  padding: var(--space-lg);
+}
+
+/* Bowling Stats */
+.bowling-table-container {
+  padding: var(--space-lg);
+  overflow-x: auto;
+}
+
+.bowling-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.bowling-table th,
+.bowling-table td {
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.bowling-table th {
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--border-light);
+}
+
+.bowling-table td {
+  color: var(--text-secondary);
+}
+
+.bowler-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.no-data {
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* Recent Events */
+.events-container {
+  padding: var(--space-lg);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.event-item {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.event-item:last-child {
+  border-bottom: none;
+}
+
+.event-time {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.event-description {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.event-runs {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.event-extras {
+  color: var(--warning);
+  font-weight: 500;
+}
+
+.event-wicket {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.no-events {
+  text-align: center;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: var(--space-lg);
+}
+
+/* Danger Zone */
+.danger-zone {
+  border: 2px solid var(--danger);
+  border-radius: var(--radius-lg);
+}
+
+.danger-actions {
+  padding: var(--space-lg);
+  display: grid;
+  gap: var(--space-md);
+}
+
+.danger-form {
+  display: flex;
+  gap: var(--space-md);
+  align-items: end;
+  flex-wrap: wrap;
+}
+
+/* ===== PLAYER SELECTION ===== */
+.select-players-section {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.match-info-header {
+  text-align: center;
+  margin-bottom: var(--space-2xl);
+}
+
+.match-details {
+  display: flex;
+  gap: var(--space-lg);
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--space-md);
+}
+
+.team-vs {
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.match-overs {
+  color: var(--text-secondary);
+}
+
+.teams-container {
+  display: grid;
+  gap: var(--space-2xl);
+  margin-bottom: var(--space-2xl);
+}
+
+.team-selection {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.team-header {
+  padding: var(--space-lg);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border);
+}
+
+.team-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.team-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.players-grid {
+  padding: var(--space-lg);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-md);
+}
+
+.player-checkbox {
+  cursor: pointer;
+}
+
+.player-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  background: var(--surface);
+}
+
+.player-card:hover {
+  border-color: var(--primary-light);
+  background-color: rgba(59, 130, 246, 0.05);
+}
+
+.player-card.selected {
+  border-color: var(--primary);
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.player-name {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.checkbox-indicator {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.player-checkbox input:checked + .player-card .checkbox-indicator {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  position: relative;
+}
+
+.player-checkbox input:checked + .player-card .checkbox-indicator::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+/* ===== SUMMARY & SCORECARDS ===== */
+.summary-title-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.summary-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.teams-overview {
+  margin-bottom: var(--space-xl);
+}
+
+.teams-grid {
+  padding: var(--space-lg);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-xl);
+}
+
+.team-roster {
+  text-align: center;
+}
+
+.team-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: var(--space-md);
+}
+
+.player-list {
+  list-style: none;
+}
+
+.player-item {
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+
+.player-item:last-child {
+  border-bottom: none;
+}
+
+.match-result {
+  margin-bottom: var(--space-xl);
+}
+
+.result-content {
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.target-info {
+  margin-bottom: var(--space-md);
+}
+
+.target-label {
+  color: var(--text-secondary);
+  margin-right: var(--space-sm);
+}
+
+.target-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.result-status {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.innings-details {
+  display: grid;
+  gap: var(--space-2xl);
+}
+
+.innings-card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.innings-header {
+  padding: var(--space-lg);
+  background: var(--border-light);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.scorecard-section {
+  margin-bottom: var(--space-lg);
+}
+
+.scorecard-title {
+  padding: var(--space-lg) var(--space-lg) 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.table-container {
+  padding: 0 var(--space-lg) var(--space-lg);
+  overflow-x: auto;
+}
+
+.scorecard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.scorecard-table th,
+.scorecard-table td {
+  padding: var(--space-sm) var(--space-md);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.scorecard-table th {
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--border-light);
+}
+
+.status-out {
+  color: var(--danger);
+  font-weight: 500;
+}
+
+.status-retired {
+  color: var(--warning);
+  font-weight: 500;
+}
+
+.status-not-out {
+  color: var(--success);
+  font-weight: 500;
+}
+
+.summary-actions {
+  margin-top: var(--space-2xl);
+}
+
+.actions-container {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ===== PLAYERS & TEAMS MANAGEMENT ===== */
+.players-section,
+.teams-section {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.add-player-form,
+.add-team-form {
+  padding: var(--space-lg);
+}
+
+.players-list,
+.teams-list {
+  padding: var(--space-lg);
+}
+
+.player-item,
+.team-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md);
+  border-bottom: 1px solid var(--border);
+  transition: background-color var(--transition-fast);
+}
+
+.player-item:hover,
+.team-item:hover {
+  background-color: var(--border-light);
+}
+
+.player-item:last-child,
+.team-item:last-child {
+  border-bottom: none;
+}
+
+.player-info,
+.team-info {
+  flex: 1;
+}
+
+.player-name,
+.team-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xs);
+}
+
+.team-players {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.player-actions,
+.team-actions {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
+.delete-form {
+  display: inline;
+}
+
+/* ===== EDIT FORMS ===== */
+.edit-player-section,
+.edit-team-section,
+.new-match-section {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.edit-player-form,
+.edit-team-form,
+.new-match-form {
+  padding: var(--space-lg);
+}
+
+.teams-info {
+  margin: var(--space-xl) 0;
+}
+
+.info-card {
+  background: var(--border-light);
+  padding: var(--space-lg);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--primary);
+}
+
+.info-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.info-text {
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.info-note {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* ===== CONFIRM DELETE ===== */
+.confirm-delete-section {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.confirm-content {
+  padding: var(--space-lg);
+  text-align: center;
+}
+
+.confirm-message {
+  font-size: 1.125rem;
+  color: var(--text-primary);
+  margin-bottom: var(--space-xl);
+}
+
+.object-name {
+  color: var(--danger);
+}
+
+.confirm-actions {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.confirm-form {
+  display: inline;
+}
+
+/* ===== EMPTY STATES ===== */
+.empty-state {
+  text-align: center;
+  padding: var(--space-2xl);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-lg);
+}
+
+.empty-state-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.empty-state-text {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-lg);
+}
+
+.no-innings {
+  margin-top: var(--space-2xl);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Tablet (768px and up) */
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.25rem;
+  }
+  
+  .matches-grid {
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  }
+  
+  .teams-container {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .player-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .runs-grid {
+    grid-template-columns: repeat(7, 1fr);
+  }
+  
+  .extras-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  }
+  
+  .scoring-interface {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .scoring-interface .current-batsmen,
+  .scoring-interface .scoring-section {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Desktop (1024px and up) */
+@media (min-width: 1024px) {
+  .nav-container {
+    flex-wrap: nowrap;
+  }
+  
+  .hero-title {
+    font-size: 3.5rem;
+  }
+  
+  .scoring-interface {
+    grid-template-columns: 2fr 1fr;
+  }
+  
+  .scoring-interface .current-batsmen {
+    grid-column: 1;
+  }
+  
+  .scoring-interface .scoring-section {
+    grid-column: 1;
+  }
+  
+  .scoring-interface .wicket-section,
+  .scoring-interface .add-batsman-section,
+  .scoring-interface .bowling-stats,
+  .scoring-interface .recent-events {
+    grid-column: 2;
+  }
+  
+  .scoring-interface .danger-zone {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Large Desktop (1280px and up) */
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+  
+  .matches-grid {
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  .header,
+  .footer,
+  .flash-container,
+  .btn,
+  .form-actions,
+  .danger-zone {
+    display: none;
+  }
+  
+  .main {
+    padding: 0;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid var(--border);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+.btn:focus,
+.form-input:focus,
+.form-select:focus,
+.nav-link:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --border: #000000;
+    --text-secondary: #000000;
+  }
+}
+

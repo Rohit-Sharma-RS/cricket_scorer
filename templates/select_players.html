@@ -1,38 +1,78 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Select Players for Match {{match.id}}</h2>
-<h3>{{match.team1.name}} vs {{match.team2.name}} ({{match.overs}} overs)</h3>
-
-<form method="post">
-  <div style="display: flex; gap: 40px; margin: 20px 0;">
-
-    <!-- Team 1 -->
-    <div style="flex: 1;">
-      <h4>{{ match.team1.name }} Players</h4>
-      {% for player in all_players %}
-        <div>
-          <label>
-            <input type="checkbox" name="team1_players" value="{{player.id}}">
-            {{ player.name }}
-          </label>
-        </div>
-      {% endfor %}
+<section class="select-players-section">
+  <div class="match-info-header">
+    <h2 class="match-title">Select Players for Match {{ match.id }}</h2>
+    <div class="match-details">
+      <span class="team-vs">{{ match.team1.name }} vs {{ match.team2.name }}</span>
+      <span class="match-overs">{{ match.overs }} overs</span>
     </div>
-
-    <!-- Team 2 -->
-    <div style="flex: 1;">
-      <h4>{{ match.team2.name }} Players</h4>
-      {% for player in all_players %}
-        <div>
-          <label>
-            <input type="checkbox" name="team2_players" value="{{player.id}}">
-            {{ player.name }}
-          </label>
-        </div>
-      {% endfor %}
-    </div>
-
   </div>
-  <button type="submit">Save Teams</button>
-</form>
+
+  <form method="post" class="player-selection-form">
+    <div class="teams-container">
+      <!-- Team 1 -->
+      <div class="team-selection">
+        <div class="team-header">
+          <h3 class="team-name">{{ match.team1.name }}</h3>
+          <p class="team-subtitle">Select players for batting first</p>
+        </div>
+        <div class="players-grid">
+          {% for player in all_players %}
+            <label class="player-checkbox">
+              <input type="checkbox" name="team1_players" value="{{ player.id }}" class="checkbox">
+              <div class="player-card">
+                <span class="player-name">{{ player.name }}</span>
+                <div class="checkbox-indicator"></div>
+              </div>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Team 2 -->
+      <div class="team-selection">
+        <div class="team-header">
+          <h3 class="team-name">{{ match.team2.name }}</h3>
+          <p class="team-subtitle">Select players for bowling first</p>
+        </div>
+        <div class="players-grid">
+          {% for player in all_players %}
+            <label class="player-checkbox">
+              <input type="checkbox" name="team2_players" value="{{ player.id }}" class="checkbox">
+              <div class="player-card">
+                <span class="player-name">{{ player.name }}</span>
+                <div class="checkbox-indicator"></div>
+              </div>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary btn-lg">Save Teams & Start Match</button>
+      <a href="/matches/new" class="btn btn-secondary">Back</a>
+    </div>
+  </form>
+</section>
+
+<script>
+// Add some interactivity for better UX
+document.addEventListener('DOMContentLoaded', function() {
+  const checkboxes = document.querySelectorAll('.player-checkbox input[type="checkbox"]');
+  
+  checkboxes.forEach(checkbox => {
+    checkbox.addEventListener('change', function() {
+      const card = this.closest('.player-card');
+      if (this.checked) {
+        card.classList.add('selected');
+      } else {
+        card.classList.remove('selected');
+      }
+    });
+  });
+});
+</script>
 {% endblock %}
+

@@ -1,13 +1,59 @@
 {% extends 'base.html' %}
 {% block content %}
-  <h2>Teams</h2>
-  <form method="post">
-    <input name="name" placeholder="Team name">
-    <button type="submit">Create</button>
-  </form>
-  <ul>
-    {% for t in teams %}
-      <li>{{t.name}} ({{t.players|length}} players)</li>
-    {% endfor %}
-  </ul>
+<section class="teams-section">
+  <div class="section-header">
+    <h2 class="section-title">Teams Management</h2>
+    <p class="section-subtitle">Organize players into teams</p>
+  </div>
+
+  <!-- Add Team Form -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">Create New Team</h3>
+    </div>
+    <form method="post" class="add-team-form">
+      <div class="form-row">
+        <div class="form-group">
+          <input 
+            type="text" 
+            name="name" 
+            placeholder="Enter team name..." 
+            class="form-input" 
+            required
+          >
+        </div>
+        <button type="submit" class="btn btn-primary">Create Team</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Teams List -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">All Teams</h3>
+    </div>
+    <div class="teams-list">
+      {% for t in teams %}
+        <div class="team-item">
+          <div class="team-info">
+            <h4 class="team-name">{{ t.name }}</h4>
+            <p class="team-players">{{ t.players|length }} players</p>
+          </div>
+          <div class="team-actions">
+            <a href="{{ url_for('edit_team', team_id=t.id) }}" class="btn btn-sm btn-secondary">
+              Edit
+            </a>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon">🏏</div>
+          <h3 class="empty-state-title">No teams yet</h3>
+          <p class="empty-state-text">Create your first team to organize players</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
 {% endblock %}
+

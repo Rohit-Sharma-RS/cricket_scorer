@@ -1,9 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Confirm Delete</h2>
-<p>Are you sure you want to delete {{ object_type }} <strong>{{ object_name }}</strong>?</p>
-<form method="post" action="{{ confirm_url }}">
-  <button type="submit">Yes, Delete</button>
-</form>
-<a href="{{ cancel_url }}">Cancel</a>
+<section class="confirm-delete-section">
+  <div class="card card-danger">
+    <div class="card-header">
+      <h2 class="card-title">⚠️ Confirm Deletion</h2>
+      <p class="card-subtitle">This action cannot be undone</p>
+    </div>
+    
+    <div class="confirm-content">
+      <p class="confirm-message">
+        Are you sure you want to delete {{ object_type }} 
+        <strong class="object-name">{{ object_name }}</strong>?
+      </p>
+      
+      <div class="confirm-actions">
+        <form method="post" action="{{ confirm_url }}" class="confirm-form">
+          <button type="submit" class="btn btn-danger btn-lg">
+            Yes, Delete {{ object_type }}
+          </button>
+        </form>
+        <a href="{{ cancel_url }}" class="btn btn-secondary btn-lg">
+          Cancel
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}
+

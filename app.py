@@ -1,28 +1,22 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from models import (
-    db, Team, Player, Match, Innings, PlayerInnings, BallEvent, BowlingInnings, MatchTeamPlayer
-)
+from models import db, Team, Player, Match, Innings, PlayerInnings, BallEvent, BowlingInnings, MatchTeamPlayer
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
-
 import os
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cricket.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'devsecret'
 
-db_url = os.getenv("DATABASE_URL", "sqlite:///app.db")
+# --- Database Setup ---
+db_url = os.getenv("DATABASE_URL", "sqlite:///cricket.db")  # ✅ Use SQLite locally, Postgres on Render
 if db_url.startswith("postgres://"):
-    # Render gives postgres://, SQLAlchemy wants postgresql://
-    db_url = db_url.replace("postgres://", "postgresql://", 1)
+    db_url = db_url.replace("postgres://", "postgresql://", 1)  # ✅ Render fix
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-db = SQLAlchemy(app)
-
 
 db.init_app(app)
+
 with app.app_context():
     db.create_all()
     # Ensure two fixed teams exist
