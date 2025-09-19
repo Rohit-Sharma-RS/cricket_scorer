@@ -276,35 +276,6 @@
         </div>
       </section>
 
-      <!-- Recent Events -->
-      <section class="recent-events">
-        <div class="card">
-          <div class="card-header">
-            <h3 class="card-title">Recent Events</h3>
-          </div>
-          <div class="events-container">
-            {% for e in innings.ball_events|sort(attribute='created_at')|reverse %}
-              <div class="event-item">
-                <div class="event-time">{{ e.created_at.strftime('%H:%M:%S') }}</div>
-                <div class="event-description">
-                  {% if e.bowler %}{{ e.bowler.name }} to {% endif %}
-                  {% if e.striker %}{{ e.striker.name }}{% else %}unknown batsman{% endif %}:
-                  <span class="event-runs">{{ e.runs }}</span>
-                  {% if e.extras %}<span class="event-extras"> + {{ e.extras }}</span>{% endif %}
-                  {% if e.wicket_type %}
-                    <span class="event-wicket"> - Wicket: {{ e.wicket_type }}
-                      {% if e.wicket_taker %} (by {{ e.wicket_taker.name }}){% endif %}
-                    </span>
-                  {% endif %}
-                </div>
-              </div>
-            {% else %}
-              <div class="no-events">No events recorded yet</div>
-            {% endfor %}
-          </div>
-        </div>
-      </section>
-
       <!-- Danger Zone -->
       <section class="danger-zone">
         <div class="card card-danger">
@@ -334,6 +305,34 @@
             <form method="post" action="{{ url_for('end_match', match_id=match.id) }}" class="danger-form">
               <button type="submit" class="btn btn-danger">End Match</button>
             </form>
+          </div>
+        </div>
+      </section>
+            <!-- Recent Events -->
+      <section class="recent-events">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Events</h3>
+          </div>
+          <div class="events-container">
+            {% for e in innings.ball_events|sort(attribute='created_at')|reverse %}
+              <div class="event-item">
+                <div class="event-time">{{ e.created_at.strftime('%H:%M:%S') }}</div>
+                <div class="event-description">
+                  {% if e.bowler %}{{ e.bowler.name }} to {% endif %}
+                  {% if e.striker %}{{ e.striker.name }}{% else %}unknown batsman{% endif %}:
+                  <span class="event-runs">{{ e.runs }}</span>
+                  {% if e.extras %}<span class="event-extras"> + {{ e.extras }}</span>{% endif %}
+                  {% if e.wicket_type %}
+                    <span class="event-wicket"> - Wicket: {{ e.wicket_type }}
+                      {% if e.wicket_taker %} (by {{ e.wicket_taker.name }}){% endif %}
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+            {% else %}
+              <div class="no-events">No events recorded yet</div>
+            {% endfor %}
           </div>
         </div>
       </section>
