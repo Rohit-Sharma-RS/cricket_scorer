@@ -5,7 +5,7 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # ✅ Load variables from .env locally
+load_dotenv('secret.env') 
 
 app = Flask(__name__)
 app.secret_key = os.getenv("SECRET_KEY", "devsecret")

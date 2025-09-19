@@ -2,11 +2,6 @@ instance
 __pycache__
 *.pyc
 *.pyo
-*.pyd
-env/
-venv/
-ENV/
-.venv/
-env.bak/
-venv.bak/
 dummy.txt
+*.env
+.env
