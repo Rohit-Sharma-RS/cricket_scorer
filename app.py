@@ -3,18 +3,19 @@ from models import db, Team, Player, Match, Innings, PlayerInnings, BallEvent, B
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime
 import os
+from dotenv import load_dotenv
+
+load_dotenv()  # ✅ Load variables from .env locally
 
 app = Flask(__name__)
-app.secret_key = 'devsecret'
+app.secret_key = os.getenv("SECRET_KEY", "devsecret")
 
-# --- Database Setup ---
-db_url = os.getenv("DATABASE_URL", "sqlite:///cricket.db")  # ✅ Use SQLite locally, Postgres on Render
+db_url = os.getenv("DATABASE_URL", "sqlite:///cricket.db")
 if db_url.startswith("postgres://"):
-    db_url = db_url.replace("postgres://", "postgresql://", 1)  # ✅ Render fix
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 db.init_app(app)
 
 with app.app_context():
